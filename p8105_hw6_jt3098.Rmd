@@ -9,7 +9,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
-```{r}
-
+## Problem 1
+```{r data importing for problem 1, message=FALSE}
+homicide_data = read_csv("./data/homicide-data.csv")
 ```
 
