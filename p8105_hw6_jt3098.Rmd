@@ -11,6 +11,7 @@ library(tidyverse)
 
 ## Problem 1
 ```{r data importing for problem 1, message=FALSE}
+# import data for problem 1
 homicide_data = read_csv("./data/homicide-data.csv")
 ```
 
