@@ -15,3 +15,14 @@ library(tidyverse)
 homicide_data = read_csv("./data/homicide-data.csv")
 ```
 
+```{r creating variables}
+# Make a "city_state" variable
+homicide_data = 
+  homicide_data %>%
+  mutate(city_state = str_c(city, ", ", state)) %>%
+  select(-city, -state)
+
+# Make a binary variable to show whether this case is solved
+
+```
+
