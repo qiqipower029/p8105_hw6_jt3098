@@ -10,12 +10,15 @@ library(tidyverse)
 ```
 
 ## Problem 1
+
+#### Data importing
 ```{r data importing for problem 1, message=FALSE}
 # import data for problem 1
 homicide_data = read_csv("./data/homicide-data.csv")
 ```
 
-```{r creating variables}
+#### Data cleaning and manipulation
+```{r creating and manipulating variables}
 # Make a "city_state" variable
 homicide_data = 
   homicide_data %>%
@@ -23,6 +26,68 @@ homicide_data =
   select(-city, -state)
 
 # Make a binary variable to show whether this case is solved
+# "0" means the case is unsolved yet, and "1" means the case is already solved
+homicide_data = 
+  homicide_data %>%
+  mutate(case_status = ifelse(disposition == "Closed by arrest", 1, 0))
+
+# Make sure that the "victim_age is numeric
+homicide_data$victim_age = as.numeric(homicide_data$victim_age)
+
+# Omit several cities that do not have the correct information
+homicide_data = 
+  homicide_data %>%
+  filter(!city_state %in% c("Dallas, TX", "Phoenix, AZ", "Kansas City, MO", "Tulsa, AL"))
+
+# Modify "victim_race" variable
+homicide_data = 
+  homicide_data %>%
+  mutate(victim_race = ifelse(victim_race == "White", "white", "non-white"))
+
+# Relevel "victim_race" variable
+homicide_data$victim_race = as.vector(homicide_data$victim_race)
+# Relevel the vector by setting the "white" as the reference 
+
+```
+
+#### Regression Analysis for Baltimore city
+```{r Baltimore regression}
+# Create a new dataframe that only contains data about Baltimore city
+homicide_Baltimore =
+  homicide_data %>%
+  filter(city_state == "Baltimore, MD")
+
+# Fit a glm regression for Baltimore
+Baltimore_glm = glm(case_status ~ victim_age + victim_race + victim_sex, data = homicide_Baltimore)
+
+# See the result of the glm regression
+broom::tidy(Baltimore_glm)
+```
+
+```{r odds ratio}
+
+```
+
+### Problem 2
+
+#### Data importing
+```{r data importing for problem 2, message=FALSE}
+# Import dataset for problem 2
+birthweight_data = read_csv("./data/birthweight.csv")
+```
+
+```{r data cleaning and manipulation for birthweight data}
+# Convert variable types from numeric to factor
+birthweight_data$babysex = as.factor(birthweight_data$babysex)
+birthweight_data$frace = as.factor(birthweight_data$frace)
+birthweight_data$mrace = as.factor(birthweight_data$mrace)
+
+# Check for NA values
+n_NA = sapply(birthweight_data[1:20], function(x) sum(length(which(is.na(x)))))
+n_NA
+```
+
+```{r model building for birthweight data}
 
 ```
 
