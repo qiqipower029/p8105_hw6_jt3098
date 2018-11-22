@@ -45,9 +45,8 @@ homicide_data =
   mutate(victim_race = ifelse(victim_race == "White", "white", "non-white"))
 
 # Relevel "victim_race" variable
-homicide_data$victim_race = as.vector(homicide_data$victim_race)
-# Relevel the vector by setting the "white" as the reference 
-
+homicide_data$victim_race = factor(homicide_data$victim_race,
+                                   levels = c("white", "non-white"))
 ```
 
 #### Regression Analysis for Baltimore city
