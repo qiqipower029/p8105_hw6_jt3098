@@ -76,10 +76,16 @@ broom::tidy(Baltimore_glm) %>% knitr::kable()
 # Calculate the estimation and confidence interval of odds ratio
 status_sex_glm = glm(case_status ~ victim_sex + victim_race + victim_age, data = homicide_Baltimore, family = binomial)
 ci_oddsratio = odds.ratio(status_sex_glm, level = 0.95)
-ci_oddsratio %>% knitr::kable()
+ci_oddsratio =
+  ci_oddsratio %>%
+  as.data.frame() %>%
+  select(-p) %>%
+  round(digits = 3)
 
-# Extract the odds ratio for race variable
+ci_oddsratio %>% knitr::kable()
 ```
+
+Comments: From the result, we could know that the OR estimate is 0.441 with the 95% CI: [0.312, 0.620], keeping all other variables fixed.
 
 ```{r odds ratio for each city}
 # Make list columns to make glm results for each city
@@ -88,13 +94,20 @@ homicide_city_glm =
   group_by(city_state) %>%
   nest() %>%
   mutate(regression = map(data, ~glm(case_status ~ victim_sex + victim_race + victim_age, data = homicide_data, family = binomial))) %>%
-  mutate(regression = map(regression, broom::tidy)) %>%
   select(-data) 
 ```
 
 ```{r unnest the result of glm}
-# Unnest and create a dataframe to store the result
+# Unnest the glm result and select only the race term
+homicide_city_glm = 
+  homicide_city_glm %>%
+  unnest() %>%
+  filter(term == "victim_racenon-white")
 
+# Calculate the confidence interval for each city
+homicide_city_glm = 
+  homicide_city_glm %>%
+  mutate(ci_result = map())
 ```
 
 ### Problem 2
