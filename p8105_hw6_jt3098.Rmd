@@ -16,7 +16,7 @@ library(purrr)
 #### Data importing
 ```{r data importing for problem 1, message=FALSE}
 # import data for problem 1
-homicide_data = read_csv("./data/homicide-data.csv")
+homicide_data = read_csv("https://raw.githubusercontent.com/washingtonpost/data-homicides/master/homicide-data.csv")
 ```
 
 #### Data cleaning and manipulation
@@ -36,12 +36,8 @@ homicide_data =
 # Make sure that the "victim_age" is numeric
 homicide_data = 
   homicide_data %>%
-  mutate(victim_age = replace(victim_age, victim_age == "Unknown", ""),
-         victim_age = as.numeric(victim_age))
+  mutate(victim_age = as.numeric(victim_age))
 
-# Convert "victim_sex" from character to factor
-homicide_data$victim_sex = factor(homicide_data$victim_sex,
-                                  levels = c("Male", "Female"))
 
 # Omit several cities that do not have the correct information
 homicide_data = 
@@ -51,11 +47,9 @@ homicide_data =
 # Modify "victim_race" variable
 homicide_data = 
   homicide_data %>%
-  mutate(victim_race = ifelse(victim_race == "White", "white", "non-white"))
+  mutate(victim_race = ifelse(victim_race == "White", "white", "non-white"),
+         victim_race = fct_relevel(victim_race, "white", "non-white")) 
 
-# Relevel "victim_race" variable
-homicide_data$victim_race = factor(homicide_data$victim_race,
-                                   levels = c("white", "non-white")) # Make "white" be the reference arm of all factors
 ```
 
 #### Regression Analysis for Baltimore city
@@ -89,18 +83,21 @@ Comments: From the result, we could know that the OR estimate is 0.441 with the 
 
 ```{r odds ratio for each city}
 # Make list columns to make glm results for each city
-homicide_city_glm = 
-  homicide_data %>%
-  group_by(city_state) %>%
-  nest() %>%
-  mutate(regression = map(data, ~glm(case_status ~ victim_sex + victim_race + victim_age, data = homicide_data, family = binomial))) %>%
-  select(-data) %>%
-  unnest()
+homicide_city_glm =
+  homicide_data %>% 
+  # first creating a listcolumn organized by city_state
+  group_by(city_state) %>% 
+  nest() %>% 
+  # running glm on every city
+  mutate(regression = map(data, ~glm(case_status ~ victim_sex + victim_race + victim_age, 
+                                      family = binomial, data = .x)), 
+         regression = map(regression, broom::tidy)) %>% 
+  select(-data) 
 ```
 
 ```{r unnest the result of glm}
 # Unnest the glm result and select only the race term
-homicide_city_glm = 
+homicide_city_glm =
   homicide_city_glm %>%
   unnest() %>%
   filter(term == "victim_racenon-white")
@@ -108,7 +105,15 @@ homicide_city_glm =
 # Calculate the confidence interval for each city
 homicide_city_glm = 
   homicide_city_glm %>%
-  mutate(ci_result = map())
+  mutate(OR = exp(estimate),
+         OR_lower = exp(estimate - 1.96*std.error), 
+         OR_upper = exp(estimate + 1.96*std.error), 
+         city_state = fct_reorder(city_state, estimate)) %>% 
+  select(city_state, OR, OR_lower, OR_upper)
+```
+
+```{r making a plot to show the ci for each city}
+
 ```
 
 ### Problem 2
