@@ -106,14 +106,23 @@ homicide_city_glm =
 homicide_city_glm = 
   homicide_city_glm %>%
   mutate(OR = exp(estimate),
-         OR_lower = exp(estimate - 1.96*std.error), 
-         OR_upper = exp(estimate + 1.96*std.error), 
+         OR_lower = exp(estimate - 1.96 * std.error), 
+         OR_upper = exp(estimate + 1.96 * std.error), 
          city_state = fct_reorder(city_state, estimate)) %>% 
   select(city_state, OR, OR_lower, OR_upper)
 ```
 
 ```{r making a plot to show the ci for each city}
-
+homicide_city_glm %>%
+  ggplot(aes(x = city_state, y = OR)) + geom_point() +
+  geom_errorbar(aes(ymin = OR_lower, ymax = OR_upper)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, size = 8)) +
+  labs(
+    title = "Odds Ratio and 95% Confidence Interval for Each City",
+    x = "City, State",
+    y = "Odds Ratio and 95% Confidence Interval"
+  )
 ```
 
 ### Problem 2
