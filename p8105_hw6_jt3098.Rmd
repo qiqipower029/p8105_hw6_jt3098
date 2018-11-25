@@ -94,7 +94,8 @@ homicide_city_glm =
   group_by(city_state) %>%
   nest() %>%
   mutate(regression = map(data, ~glm(case_status ~ victim_sex + victim_race + victim_age, data = homicide_data, family = binomial))) %>%
-  select(-data) 
+  select(-data) %>%
+  unnest()
 ```
 
 ```{r unnest the result of glm}
