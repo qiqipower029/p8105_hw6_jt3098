@@ -9,6 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(questionr)
 library(purrr)
+library(modelr)
 ```
 
 ## Problem 1
@@ -125,6 +126,8 @@ homicide_city_glm %>%
   )
 ```
 
+Comments: From the graph, we could see that, Boston has the lowest odds ratio, while Tempa has the highest odds ratio. It is also noticeable that Durham has the widest confidence interval range.
+
 ### Problem 2
 
 #### Data importing
@@ -145,6 +148,15 @@ n_NA %>% knitr::kable()
 ```
 
 ```{r model building for birthweight data}
+# Construct a multiple linear model with all predictors for birthweight
+birthweight_lm_all = lm(bwt ~ ., data = birthweight_data)
+summary(birthweight_lm_all) # Check the estimates and p-values for all predictors
+
+# Use step-wise method to build a linear model with fewer predictors
+step(birthweight_lm_all, direction = "backward")
+```
+
+```{r plot for the model}
 
 ```
 
