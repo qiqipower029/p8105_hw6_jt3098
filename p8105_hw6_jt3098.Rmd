@@ -150,13 +150,19 @@ n_NA %>% knitr::kable()
 ```{r model building for birthweight data}
 # Construct a multiple linear model with all predictors for birthweight
 birthweight_lm_all = lm(bwt ~ ., data = birthweight_data)
-summary(birthweight_lm_all) # Check the estimates and p-values for all predictors
 
-# Use step-wise method to build a linear model with fewer predictors
+# Use step-wise method to find a linear model with fewer predictors
 step(birthweight_lm_all, direction = "backward")
+
+# Build the model in R
+birthweight_best = lm(bwt ~ babysex + bhead + blength + delwt + fincome + gaweeks + mheight + mrace + parity + ppwt + smoken, data = birthweight_data)
 ```
 
-```{r plot for the model}
-
+```{r plot for the model, message=FALSE}
+# Making a plot for residuals and predictions
+birthweight_data %>%
+  modelr::add_residuals(birthweight_best) %>%
+  modelr::add_predictions(birthweight_best) %>% 
+  ggplot(aes(x = pred, y = resid)) + geom_point() + theme_bw()
 ```
 
