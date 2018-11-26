@@ -21,7 +21,7 @@ homicide_data = read_csv("./data/homicide-data.csv")
 ```
 
 #### Data cleaning and manipulation
-```{r creating and manipulating variables, message=FALSE}
+```{r creating and manipulating variables, message=FALSE, warning=FALSE}
 # Make a "city_state" variable
 homicide_data = 
   homicide_data %>%
@@ -158,6 +158,8 @@ step(birthweight_lm_all, direction = "backward")
 birthweight_best = lm(bwt ~ babysex + bhead + blength + delwt + fincome + gaweeks + mheight + mrace + parity + ppwt + smoken, data = birthweight_data)
 ```
 
+In order to choose the most relevant predictors, I used 'step' function with 'backward' method to find the best model. At the very beginning, the model contains all variables in the original dataset. Then, the variable with the highest p-value would be taken out. The next variable with the highest p-value would be taken out...Finally, the model would only comprise of variables with p-value less than the criteria (0.05). Therefore, we got our most fitted model.
+
 ```{r plot for the model, message=FALSE}
 # Making a plot for residuals and predictions
 birthweight_data %>%
@@ -200,3 +202,4 @@ compare_df %>%
   )
 ```
 
+Comments: in this graph, we could see that, the fitted model selected by 'backward elimination' has the lowest rmse, and the model only contains the main predictor has the highest rmse. So, the model we've built is better than the other two models.
