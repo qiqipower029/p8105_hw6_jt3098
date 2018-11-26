@@ -17,7 +17,7 @@ library(modelr)
 #### Data importing
 ```{r data importing for problem 1, message=FALSE}
 # import data for problem 1
-homicide_data = read_csv("https://raw.githubusercontent.com/washingtonpost/data-homicides/master/homicide-data.csv")
+homicide_data = read_csv("./data/homicide-data.csv")
 ```
 
 #### Data cleaning and manipulation
@@ -164,5 +164,39 @@ birthweight_data %>%
   modelr::add_residuals(birthweight_best) %>%
   modelr::add_predictions(birthweight_best) %>% 
   ggplot(aes(x = pred, y = resid)) + geom_point() + theme_bw()
+```
+
+```{r compare this model to other two models}
+# Make a train and test dataset using the original data
+compare_df = 
+  crossv_mc(birthweight_data, 100) %>%
+  mutate(train = map(train, as_tibble),
+         test = map(test, as_tibble))
+
+# Make three models in this dataset
+compare_df = 
+  compare_df %>%
+  mutate(fitted_model = map(train, ~lm(bwt ~ babysex + bhead + blength + delwt + fincome + gaweeks + mheight + mrace + parity + ppwt + smoken, data = .x)),
+         model_compare1 = map(train, ~lm(bwt ~ gaweeks, data = .x)),
+         model_compare2 = map(train, ~lm(bwt ~ bhead*blength*babysex, data = .x))) %>%
+  mutate(rmse_fitted = map2_dbl(fitted_model, test, ~rmse(model = .x, data = .y)),
+         rmse_compare1 = map2_dbl(model_compare1, test, ~rmse(model = .x, data = .y)),
+         rmse_compare2 = map2_dbl(model_compare2, test, ~rmse(model = .x, data = .y)))
+```
+
+```{r make a plot to show the comparism}
+# Make a plot to show the distribution of rmse
+compare_df %>%
+  select(starts_with("rmse")) %>%
+  gather(key = model, value = rmse) %>%
+  mutate(model = str_replace(model, "rmse_", ""),
+         model = fct_inorder(model)) %>% 
+  ggplot(aes(x = model, y = rmse)) + geom_violin() +
+  theme_bw() +
+  labs(
+    title = "Comparing RMSE of Three Models",
+    x = "Models",
+    y = "Distribution of RMSE"
+  )
 ```
 
